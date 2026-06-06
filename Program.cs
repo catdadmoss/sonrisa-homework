@@ -37,6 +37,10 @@ builder.Services.AddScoped<NotificationService>();
 // API Service for Blazor
 builder.Services.AddScoped<ApiService>();
 
+// RSS Feed Service
+builder.Services.AddScoped<RssFeedService>();
+builder.Services.AddHttpClient();
+
 // Quartz for background jobs
 builder.Services.AddQuartz(q =>
 {
@@ -50,6 +54,16 @@ builder.Services.AddQuartz(q =>
 		.WithIdentity("NotificationJob-trigger")
 		.WithSimpleSchedule(x => x
 			.WithIntervalInSeconds(30)
+			.RepeatForever()));
+
+	var rssFeedJobKey = new JobKey("RssFeedCheckJob");
+	q.AddJob<RssFeedCheckJob>(opts => opts.WithIdentity(rssFeedJobKey));
+
+	q.AddTrigger(opts => opts
+		.ForJob(rssFeedJobKey)
+		.WithIdentity("RssFeedCheckJob-trigger")
+		.WithSimpleSchedule(x => x
+			.WithIntervalInMinutes(5)
 			.RepeatForever()));
 });
 

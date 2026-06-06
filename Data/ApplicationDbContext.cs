@@ -13,6 +13,7 @@ public class ApplicationDbContext : DbContext
 	public DbSet<Alert> Alerts { get; set; }
 	public DbSet<Subscription> Subscriptions { get; set; }
 	public DbSet<NotificationLog> NotificationLogs { get; set; }
+	public DbSet<RssFeed> RssFeeds { get; set; }
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -53,10 +54,20 @@ public class ApplicationDbContext : DbContext
 				.HasForeignKey(e => e.AlertId)
 				.OnDelete(DeleteBehavior.Cascade);
 
-			entity.HasOne(e => e.Subscription)
-				.WithMany()
-				.HasForeignKey(e => e.SubscriptionId)
-				.OnDelete(DeleteBehavior.Cascade);
-		});
-	}
+					entity.HasOne(e => e.Subscription)
+						.WithMany()
+						.HasForeignKey(e => e.SubscriptionId)
+						.OnDelete(DeleteBehavior.Cascade);
+				});
+
+				modelBuilder.Entity<RssFeed>(entity =>
+				{
+					entity.HasKey(e => e.Id);
+					entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+					entity.Property(e => e.Url).IsRequired().HasMaxLength(500);
+					entity.Property(e => e.DefaultAlertType).HasConversion<string>();
+					entity.HasIndex(e => e.IsActive);
+					entity.HasIndex(e => e.LastCheckedAt);
+				});
+			}
 }

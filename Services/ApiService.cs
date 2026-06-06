@@ -200,8 +200,92 @@ public class ApiService
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Error fetching logs for subscription {SubscriptionId}", subscriptionId);
-			return new List<NotificationLog>();
-		}
-	}
-}
+					_logger.LogError(ex, "Error fetching logs for subscription {SubscriptionId}", subscriptionId);
+						return new List<NotificationLog>();
+					}
+				}
+
+				// RSS Feeds
+				public async Task<List<RssFeed>> GetRssFeedsAsync()
+				{
+					try
+					{
+						return await _httpClient.GetFromJsonAsync<List<RssFeed>>("api/rssfeeds") ?? new List<RssFeed>();
+					}
+					catch (Exception ex)
+					{
+						_logger.LogError(ex, "Error fetching RSS feeds");
+						return new List<RssFeed>();
+					}
+				}
+
+				public async Task<RssFeed?> GetRssFeedAsync(int id)
+				{
+					try
+					{
+						return await _httpClient.GetFromJsonAsync<RssFeed>($"api/rssfeeds/{id}");
+					}
+					catch (Exception ex)
+					{
+						_logger.LogError(ex, "Error fetching RSS feed {Id}", id);
+						return null;
+					}
+				}
+
+				public async Task<bool> CreateRssFeedAsync(RssFeed rssFeed)
+				{
+					try
+					{
+						var response = await _httpClient.PostAsJsonAsync("api/rssfeeds", rssFeed);
+						return response.IsSuccessStatusCode;
+					}
+					catch (Exception ex)
+					{
+						_logger.LogError(ex, "Error creating RSS feed");
+						return false;
+					}
+				}
+
+				public async Task<bool> UpdateRssFeedAsync(int id, RssFeed rssFeed)
+				{
+					try
+					{
+						var response = await _httpClient.PutAsJsonAsync($"api/rssfeeds/{id}", rssFeed);
+						return response.IsSuccessStatusCode;
+					}
+					catch (Exception ex)
+					{
+						_logger.LogError(ex, "Error updating RSS feed {Id}", id);
+						return false;
+					}
+				}
+
+				public async Task<bool> DeleteRssFeedAsync(int id)
+				{
+					try
+					{
+						var response = await _httpClient.DeleteAsync($"api/rssfeeds/{id}");
+						return response.IsSuccessStatusCode;
+					}
+					catch (Exception ex)
+					{
+						_logger.LogError(ex, "Error deleting RSS feed {Id}", id);
+						return false;
+					}
+				}
+
+				public async Task<bool> CheckRssFeedNowAsync(int id)
+				{
+					try
+					{
+						var response = await _httpClient.PostAsync($"api/rssfeeds/{id}/check", null);
+						return response.IsSuccessStatusCode;
+					}
+					catch (Exception ex)
+					{
+						_logger.LogError(ex, "Error triggering RSS feed check {Id}", id);
+						return false;
+					}
+				}
+			}
+

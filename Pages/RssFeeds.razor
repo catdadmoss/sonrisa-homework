@@ -1,0 +1,238 @@
+@page "/rssfeeds"
+@using AlertNotificationSystem.Models
+@using AlertNotificationSystem.Services
+@inject ApiService ApiService
+
+<h3>RSS Feed Subscriptions</h3>
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+	<div class="alert alert-success">@successMessage</div>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+	<div class="alert alert-danger">@errorMessage</div>
+}
+
+<div class="mb-3">
+	<button class="btn btn-primary" @onclick="ShowCreateForm">
+		<i class="bi bi-plus-circle"></i> Add RSS Feed
+	</button>
+</div>
+
+@if (showForm)
+{
+	<div class="card mb-3">
+		<div class="card-body">
+			<h5 class="card-title">@(editingFeed?.Id > 0 ? "Edit" : "Add New") RSS Feed</h5>
+			<EditForm Model="editingFeed" OnValidSubmit="SaveRssFeed">
+				<div class="mb-3">
+					<label class="form-label">Feed Name</label>
+					<InputText @bind-Value="editingFeed.Name" class="form-control" />
+				</div>
+				<div class="mb-3">
+					<label class="form-label">Feed URL</label>
+					<InputText @bind-Value="editingFeed.Url" class="form-control" placeholder="https://example.com/feed.xml" />
+				</div>
+				<div class="mb-3">
+					<label class="form-label">Default Alert Type</label>
+					<InputSelect @bind-Value="editingFeed.DefaultAlertType" class="form-control">
+						<option value="@AlertType.BreakingNews">Breaking News</option>
+						<option value="@AlertType.MarketMovement">Market Movement</option>
+						<option value="@AlertType.NaturalDisaster">Natural Disaster</option>
+					</InputSelect>
+				</div>
+				<div class="mb-3">
+					<label class="form-label">Check Interval (Minutes)</label>
+					<InputNumber @bind-Value="editingFeed.CheckIntervalMinutes" class="form-control" />
+				</div>
+				<div class="mb-3 form-check">
+					<InputCheckbox @bind-Value="editingFeed.IsActive" class="form-check-input" id="isActive" />
+					<label class="form-check-label" for="isActive">Active</label>
+				</div>
+				<div>
+					<button type="submit" class="btn btn-success">Save</button>
+					<button type="button" class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
+				</div>
+			</EditForm>
+		</div>
+	</div>
+}
+
+<div class="table-responsive">
+	<table class="table table-hover">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>URL</th>
+				<th>Type</th>
+				<th>Interval</th>
+				<th>Status</th>
+				<th>Last Check</th>
+				<th>Items</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var feed in rssFeeds)
+			{
+				<tr>
+					<td>@feed.Name</td>
+					<td><small>@(feed.Url.Length > 50 ? feed.Url.Substring(0, 47) + "..." : feed.Url)</small></td>
+					<td><span class="badge bg-info">@feed.DefaultAlertType</span></td>
+					<td>@feed.CheckIntervalMinutes min</td>
+					<td>
+						@if (feed.IsActive)
+						{
+							<span class="badge bg-success">Active</span>
+						}
+						else
+						{
+							<span class="badge bg-secondary">Inactive</span>
+						}
+					</td>
+					<td>
+						@if (feed.LastCheckedAt.HasValue)
+						{
+							<small>@feed.LastCheckedAt.Value.ToString("g")</small>
+						}
+						else
+						{
+							<small class="text-muted">Never</small>
+						}
+					</td>
+					<td>@feed.ItemsProcessed</td>
+					<td>
+						<button class="btn btn-sm btn-outline-primary" @onclick="() => EditRssFeed(feed)">Edit</button>
+						<button class="btn btn-sm btn-outline-success" @onclick="() => CheckFeedNow(feed.Id)">Check Now</button>
+						<button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteRssFeed(feed.Id)">Delete</button>
+					</td>
+				</tr>
+				@if (!string.IsNullOrEmpty(feed.LastError))
+				{
+					<tr>
+						<td colspan="8">
+							<div class="alert alert-warning mb-0">
+								<strong>Last Error:</strong> @feed.LastError
+							</div>
+						</td>
+					</tr>
+				}
+			}
+		</tbody>
+	</table>
+</div>
+
+@if (rssFeeds.Count == 0)
+{
+	<div class="alert alert-info">
+		No RSS feeds configured. Click "Add RSS Feed" to get started.
+	</div>
+}
+
+@code {
+	private List<RssFeed> rssFeeds = new();
+	private RssFeed editingFeed = new();
+	private bool showForm = false;
+	private string successMessage = string.Empty;
+	private string errorMessage = string.Empty;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadRssFeeds();
+	}
+
+	private async Task LoadRssFeeds()
+	{
+		rssFeeds = await ApiService.GetRssFeedsAsync();
+	}
+
+	private void ShowCreateForm()
+	{
+		editingFeed = new RssFeed
+		{
+			CheckIntervalMinutes = 15,
+			IsActive = true,
+			DefaultAlertType = AlertType.BreakingNews
+		};
+		showForm = true;
+		ClearMessages();
+	}
+
+	private void EditRssFeed(RssFeed feed)
+	{
+		editingFeed = new RssFeed
+		{
+			Id = feed.Id,
+			Name = feed.Name,
+			Url = feed.Url,
+			DefaultAlertType = feed.DefaultAlertType,
+			CheckIntervalMinutes = feed.CheckIntervalMinutes,
+			IsActive = feed.IsActive
+		};
+		showForm = true;
+		ClearMessages();
+	}
+
+	private async Task SaveRssFeed()
+	{
+		bool success;
+		if (editingFeed.Id > 0)
+		{
+			success = await ApiService.UpdateRssFeedAsync(editingFeed.Id, editingFeed);
+		}
+		else
+		{
+			success = await ApiService.CreateRssFeedAsync(editingFeed);
+		}
+
+		if (success)
+		{
+			successMessage = editingFeed.Id > 0 ? "RSS feed updated successfully" : "RSS feed added successfully";
+			showForm = false;
+			await LoadRssFeeds();
+		}
+		else
+		{
+			errorMessage = "Failed to save RSS feed";
+		}
+	}
+
+	private async Task DeleteRssFeed(int id)
+	{
+		if (await ApiService.DeleteRssFeedAsync(id))
+		{
+			successMessage = "RSS feed deleted successfully";
+			await LoadRssFeeds();
+		}
+		else
+		{
+			errorMessage = "Failed to delete RSS feed";
+		}
+	}
+
+	private async Task CheckFeedNow(int id)
+	{
+		if (await ApiService.CheckRssFeedNowAsync(id))
+		{
+			successMessage = "Feed check triggered";
+		}
+		else
+		{
+			errorMessage = "Failed to trigger feed check";
+		}
+	}
+
+	private void CancelEdit()
+	{
+		showForm = false;
+		ClearMessages();
+	}
+
+	private void ClearMessages()
+	{
+		successMessage = string.Empty;
+		errorMessage = string.Empty;
+	}
+}

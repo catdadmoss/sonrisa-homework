@@ -5,10 +5,11 @@ A .NET 8 Web API with Blazor Server admin interface for managing and distributin
 ## Features
 
 - **Blazor Admin UI**: Modern web-based admin dashboard
+- **RSS Feed Integration**: Automatically create alerts from RSS/Atom feeds
 - **Multiple Alert Types**: Breaking News, Market Movements, Natural Disasters
 - **Multi-Channel Delivery**: Email (SMTP) and Slack webhooks
 - **Strategy Pattern**: Easy to extend with new notification channels
-- **Background Processing**: Quartz.NET for async alert processing
+- **Background Processing**: Quartz.NET for async alert processing and RSS polling
 - **REST API**: Full CRUD operations via API endpoints
 - **SQLite Database**: Lightweight, zero-configuration database
 - **Swagger UI**: Interactive API documentation
@@ -62,7 +63,22 @@ The Blazor UI provides:
 - **Alerts Management**: Create, edit, delete alerts
 - **Subscriptions**: Manage user notification subscriptions
 - **Notification Logs**: View delivery history and errors
+- **RSS Feeds**: Subscribe to RSS/Atom feeds that automatically generate alerts
 - **Quick Actions**: Direct links to common tasks
+
+### RSS Feed Feature
+
+Subscribe to news, weather, or any RSS/Atom feed and automatically create alerts:
+
+1. Navigate to **RSS Feeds** in the admin menu
+2. Click **Add RSS Feed**
+3. Enter feed details:
+   - Name (e.g., "BBC News")
+   - Feed URL (e.g., "http://feeds.bbci.co.uk/news/rss.xml")
+   - Default Alert Type (BreakingNews, MarketMovement, or NaturalDisaster)
+   - Check Interval (how often to poll, in minutes)
+4. The background job will check feeds every 5 minutes and create alerts from new items
+5. Alerts are then distributed to all subscriptions matching the alert type
 
 ## API Usage
 
