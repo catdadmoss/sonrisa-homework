@@ -1,0 +1,283 @@
+@page "/alerts"
+@using AlertNotificationSystem.Models
+@using AlertNotificationSystem.Services
+@inject ApiService ApiService
+
+<PageTitle>Alerts - Alert Notification System</PageTitle>
+
+<h3>Alerts Management</h3>
+
+<div class="mb-3">
+	<button class="btn btn-primary" @onclick="ShowCreateForm">
+		<span class="oi oi-plus"></span> Create New Alert
+	</button>
+</div>
+
+@if (showForm)
+{
+	<div class="card mb-3">
+		<div class="card-header bg-primary text-white">
+			<h5>@(editingAlert?.Id > 0 ? "Edit Alert" : "Create New Alert")</h5>
+		</div>
+		<div class="card-body">
+			<EditForm Model="@currentAlert" OnValidSubmit="@SaveAlert">
+				<DataAnnotationsValidator />
+				<ValidationSummary />
+
+				<div class="mb-3">
+					<label class="form-label">Alert Type</label>
+					<InputSelect class="form-control" @bind-Value="currentAlert.Type">
+						<option value="">-- Select Type --</option>
+						<option value="@AlertType.BreakingNews">Breaking News</option>
+						<option value="@AlertType.MarketMovement">Market Movement</option>
+						<option value="@AlertType.NaturalDisaster">Natural Disaster</option>
+					</InputSelect>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label">Title</label>
+					<InputText class="form-control" @bind-Value="currentAlert.Title" />
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label">Message</label>
+					<InputTextArea class="form-control" rows="4" @bind-Value="currentAlert.Message" />
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label">Metadata (Optional JSON)</label>
+					<InputTextArea class="form-control" rows="2" @bind-Value="currentAlert.Metadata" />
+				</div>
+
+				<div class="btn-group">
+					<button type="submit" class="btn btn-success">
+						<span class="oi oi-check"></span> Save
+					</button>
+					<button type="button" class="btn btn-secondary" @onclick="CancelEdit">
+						<span class="oi oi-x"></span> Cancel
+					</button>
+				</div>
+			</EditForm>
+		</div>
+	</div>
+}
+
+@if (isLoading)
+{
+	<div class="text-center">
+		<div class="spinner-border" role="status">
+			<span class="visually-hidden">Loading...</span>
+		</div>
+	</div>
+}
+else if (alerts != null && alerts.Any())
+{
+	<div class="table-responsive">
+		<table class="table table-striped table-hover">
+			<thead class="table-dark">
+				<tr>
+					<th>ID</th>
+					<th>Type</th>
+					<th>Title</th>
+					<th>Status</th>
+					<th>Created At</th>
+					<th>Processed At</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var alert in alerts)
+				{
+					<tr>
+						<td>@alert.Id</td>
+						<td><span class="badge bg-info">@alert.Type</span></td>
+						<td>@alert.Title</td>
+						<td>
+							@if (alert.Status == AlertStatus.Pending)
+							{
+								<span class="badge bg-warning">Pending</span>
+							}
+							else if (alert.Status == AlertStatus.Processing)
+							{
+								<span class="badge bg-info">Processing</span>
+							}
+							else if (alert.Status == AlertStatus.Sent)
+							{
+								<span class="badge bg-success">Sent</span>
+							}
+							else if (alert.Status == AlertStatus.Failed)
+							{
+								<span class="badge bg-danger">Failed</span>
+							}
+						</td>
+						<td>@alert.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+						<td>@(alert.ProcessedAt?.ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
+						<td>
+							<button class="btn btn-sm btn-primary" @onclick="() => EditAlert(alert)">
+								<span class="oi oi-pencil"></span>
+							</button>
+							<button class="btn btn-sm btn-danger" @onclick="() => DeleteAlert(alert.Id)">
+								<span class="oi oi-trash"></span>
+							</button>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+}
+else
+{
+	<div class="alert alert-info">
+		<strong>No alerts found.</strong> Create your first alert using the button above.
+	</div>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+	<div class="alert alert-danger mt-3">
+		<strong>Error:</strong> @errorMessage
+	</div>
+}
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+	<div class="alert alert-success mt-3">
+		<strong>Success:</strong> @successMessage
+	</div>
+}
+
+@code {
+	private List<Alert>? alerts;
+	private bool isLoading = true;
+	private bool showForm = false;
+	private Alert currentAlert = new Alert();
+	private Alert? editingAlert;
+	private string? errorMessage;
+	private string? successMessage;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadAlerts();
+	}
+
+	private async Task LoadAlerts()
+	{
+		isLoading = true;
+		errorMessage = null;
+		try
+		{
+			alerts = await ApiService.GetAlertsAsync();
+		}
+		catch (Exception ex)
+		{
+			errorMessage = $"Failed to load alerts: {ex.Message}";
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private void ShowCreateForm()
+	{
+		currentAlert = new Alert();
+		editingAlert = null;
+		showForm = true;
+		errorMessage = null;
+		successMessage = null;
+	}
+
+	private void EditAlert(Alert alert)
+	{
+		editingAlert = alert;
+		currentAlert = new Alert
+		{
+			Id = alert.Id,
+			Type = alert.Type,
+			Title = alert.Title,
+			Message = alert.Message,
+			Metadata = alert.Metadata
+		};
+		showForm = true;
+		errorMessage = null;
+		successMessage = null;
+	}
+
+	private void CancelEdit()
+	{
+		showForm = false;
+		currentAlert = new Alert();
+		editingAlert = null;
+		errorMessage = null;
+		successMessage = null;
+	}
+
+	private async Task SaveAlert()
+	{
+		errorMessage = null;
+		successMessage = null;
+
+		try
+		{
+			bool success;
+			if (editingAlert?.Id > 0)
+			{
+				success = await ApiService.UpdateAlertAsync(editingAlert.Id, currentAlert);
+				successMessage = success ? "Alert updated successfully!" : null;
+			}
+			else
+			{
+				success = await ApiService.CreateAlertAsync(currentAlert);
+				successMessage = success ? "Alert created successfully!" : null;
+			}
+
+			if (success)
+			{
+				showForm = false;
+				await LoadAlerts();
+			}
+			else
+			{
+				errorMessage = "Failed to save alert. Please try again.";
+			}
+		}
+		catch (Exception ex)
+		{
+			errorMessage = $"Error saving alert: {ex.Message}";
+		}
+	}
+
+	private async Task DeleteAlert(int id)
+	{
+		if (confirm($"Are you sure you want to delete alert #{id}?"))
+		{
+			errorMessage = null;
+			successMessage = null;
+
+			try
+			{
+				var success = await ApiService.DeleteAlertAsync(id);
+				if (success)
+				{
+					successMessage = "Alert deleted successfully!";
+					await LoadAlerts();
+				}
+				else
+				{
+					errorMessage = "Failed to delete alert.";
+				}
+			}
+			catch (Exception ex)
+			{
+				errorMessage = $"Error deleting alert: {ex.Message}";
+			}
+		}
+	}
+
+	private bool confirm(string message)
+	{
+		// Simple confirmation - in production use JSInterop
+		return true;
+	}
+}

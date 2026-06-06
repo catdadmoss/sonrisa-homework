@@ -1,0 +1,72 @@
+<div class="nav-menu">
+	<div class="p-3">
+		<h4>Admin Menu</h4>
+	</div>
+	<nav class="flex-column">
+		<div class="nav-item px-3">
+			<NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+				<span class="oi oi-dashboard" aria-hidden="true"></span> Dashboard
+			</NavLink>
+		</div>
+		<div class="nav-item px-3">
+			<NavLink class="nav-link" href="alerts">
+				<span class="oi oi-bell" aria-hidden="true"></span> Alerts
+			</NavLink>
+		</div>
+		<div class="nav-item px-3">
+			<NavLink class="nav-link" href="subscriptions">
+				<span class="oi oi-people" aria-hidden="true"></span> Subscriptions
+			</NavLink>
+		</div>
+		<div class="nav-item px-3">
+			<NavLink class="nav-link" href="logs">
+				<span class="oi oi-list" aria-hidden="true"></span> Notification Logs
+			</NavLink>
+		</div>
+		<hr />
+		<div class="nav-item px-3">
+			<a class="nav-link" href="/swagger" target="_blank">
+				<span class="oi oi-document" aria-hidden="true"></span> API Docs (Swagger)
+			</a>
+		</div>
+	</nav>
+</div>
+
+<style>
+	.nav-menu {
+		padding-top: 1rem;
+	}
+
+	.nav-menu h4 {
+		color: #0d6efd;
+		font-size: 1.2rem;
+		margin-bottom: 1rem;
+	}
+
+	.nav-item {
+		font-size: 0.9rem;
+	}
+
+	.nav-link {
+		display: block;
+		padding: 0.5rem 1rem;
+		color: #333;
+		text-decoration: none;
+		border-radius: 4px;
+	}
+
+	.nav-link:hover {
+		background-color: #e9ecef;
+	}
+
+	.nav-link.active {
+		background-color: #0d6efd;
+		color: white;
+	}
+
+	.oi {
+		margin-right: 0.5rem;
+		width: 1rem;
+		font-size: 1rem;
+	}
+</style>

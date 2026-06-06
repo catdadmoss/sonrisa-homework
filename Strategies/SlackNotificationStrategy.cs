@@ -57,17 +57,16 @@ public class SlackNotificationStrategy : INotificationStrategy
 								Value = alert.Type.ToString(),
 								Short = true
 							},
-							new SlackField
-							{
-								Title = "Time",
-								Value = alert.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss UTC"),
-								Short = true
-							}
-						},
-						Timestamp = (int)((DateTimeOffset)alert.CreatedAt).ToUnixTimeSeconds()
-					}
-				}
-			};
+											new SlackField
+											{
+												Title = "Time",
+												Value = alert.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss UTC"),
+												Short = true
+											}
+										}
+									}
+								}
+							};
 
 			var result = await slackClient.PostAsync(slackMessage);
 

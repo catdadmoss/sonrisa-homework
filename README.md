@@ -1,20 +1,22 @@
 # Alert Notification System
 
-A .NET 8 Web API for managing and distributing alert notifications across multiple channels (Email, Slack) with extensibility for additional channels.
+A .NET 8 Web API with Blazor Server admin interface for managing and distributing alert notifications across multiple channels (Email, Slack) with extensibility for additional channels.
 
 ## Features
 
+- **Blazor Admin UI**: Modern web-based admin dashboard
 - **Multiple Alert Types**: Breaking News, Market Movements, Natural Disasters
 - **Multi-Channel Delivery**: Email (SMTP) and Slack webhooks
 - **Strategy Pattern**: Easy to extend with new notification channels
 - **Background Processing**: Quartz.NET for async alert processing
-- **Admin API**: Full CRUD operations via REST API
+- **REST API**: Full CRUD operations via API endpoints
 - **SQLite Database**: Lightweight, zero-configuration database
 - **Swagger UI**: Interactive API documentation
 
 ## Technology Stack (100% Free)
 
 - .NET 8
+- Blazor Server
 - Entity Framework Core + SQLite
 - Quartz.NET (background jobs)
 - MailKit (email)
@@ -25,18 +27,15 @@ A .NET 8 Web API for managing and distributing alert notifications across multip
 
 ### 1. Configure Email (Optional but recommended)
 
-Edit `appsettings.json` and update the Email section:
+Use **User Secrets** for secure credential storage:
 
-```json
-"Email": {
-  "SmtpHost": "smtp.gmail.com",
-  "SmtpPort": "587",
-  "SmtpUser": "your-email@gmail.com",
-  "SmtpPassword": "your-app-password",
-  "FromEmail": "your-email@gmail.com",
-  "FromName": "Alert Notification System"
-}
+```bash
+dotnet user-secrets set "Email:SmtpUser" "your-email@gmail.com"
+dotnet user-secrets set "Email:SmtpPassword" "your-app-password"
+dotnet user-secrets set "Email:FromEmail" "your-email@gmail.com"
 ```
+
+Or run the setup script: `.\setup-user-secrets-manual.ps1`
 
 **For Gmail**: Use an [App Password](https://support.google.com/accounts/answer/185833)
 
@@ -47,11 +46,23 @@ dotnet restore
 dotnet run
 ```
 
-The API will start at `https://localhost:5001` (or check console output)
+The application will start at `https://localhost:5001`
 
-### 3. Access Swagger UI
+### 3. Access the Admin Dashboard
 
-Navigate to: `https://localhost:5001/swagger`
+Navigate to: **`https://localhost:5001`** (Blazor UI)
+
+Or use Swagger for API: **`https://localhost:5001/swagger`**
+
+## Admin Dashboard
+
+The Blazor UI provides:
+
+- **Dashboard**: View statistics (total alerts, pending, sent, failed)
+- **Alerts Management**: Create, edit, delete alerts
+- **Subscriptions**: Manage user notification subscriptions
+- **Notification Logs**: View delivery history and errors
+- **Quick Actions**: Direct links to common tasks
 
 ## API Usage
 

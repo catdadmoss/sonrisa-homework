@@ -1,0 +1,54 @@
+@inherits LayoutComponentBase
+
+<div class="page">
+	<div class="sidebar">
+		<NavMenu />
+	</div>
+
+	<main>
+		<div class="top-row px-4">
+			<h1>Alert Notification System</h1>
+		</div>
+
+		<article class="content px-4 main-content">
+			@Body
+		</article>
+	</main>
+</div>
+
+<style>
+	.page {
+		position: relative;
+		display: flex;
+		flex-direction: row;
+	}
+
+	.sidebar {
+		background-color: #f7f7f7;
+		width: 250px;
+		height: 100vh;
+		position: fixed;
+		top: 0;
+		left: 0;
+		border-right: 1px solid #dee2e6;
+	}
+
+	main {
+		flex: 1;
+		margin-left: 250px;
+	}
+
+	.top-row {
+		background-color: #0d6efd;
+		color: white;
+		height: 3.5rem;
+		display: flex;
+		align-items: center;
+		border-bottom: 1px solid #d6d5d5;
+	}
+
+	.top-row h1 {
+		font-size: 1.5rem;
+		margin: 0;
+	}
+</style>

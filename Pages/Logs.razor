@@ -1,0 +1,161 @@
+@page "/logs"
+@using AlertNotificationSystem.Models
+@using AlertNotificationSystem.Services
+@inject ApiService ApiService
+
+<PageTitle>Notification Logs - Alert Notification System</PageTitle>
+
+<h3>Notification Logs</h3>
+
+<p class="text-muted">View the history of all notification attempts.</p>
+
+@if (isLoading)
+{
+	<div class="text-center">
+		<div class="spinner-border" role="status">
+			<span class="visually-hidden">Loading...</span>
+		</div>
+	</div>
+}
+else if (logs != null && logs.Any())
+{
+	<div class="mb-3">
+		<span class="badge bg-primary">Total Logs: @logs.Count</span>
+		<span class="badge bg-success">Successful: @logs.Count(l => l.Success)</span>
+		<span class="badge bg-danger">Failed: @logs.Count(l => !l.Success)</span>
+	</div>
+
+	<div class="table-responsive">
+		<table class="table table-striped table-hover">
+			<thead class="table-dark">
+				<tr>
+					<th>ID</th>
+					<th>Alert ID</th>
+					<th>Subscription ID</th>
+					<th>Channel</th>
+					<th>Destination</th>
+					<th>Status</th>
+					<th>Sent At</th>
+					<th>Error</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var log in logs.OrderByDescending(l => l.SentAt))
+				{
+					<tr class="@(log.Success ? "" : "table-danger")">
+						<td>@log.Id</td>
+						<td>
+							<a href="/alerts" class="badge bg-info text-decoration-none">Alert #@log.AlertId</a>
+						</td>
+						<td>
+							<a href="/subscriptions" class="badge bg-secondary text-decoration-none">Sub #@log.SubscriptionId</a>
+						</td>
+						<td><span class="badge bg-primary">@log.Channel</span></td>
+						<td>
+							<span class="text-muted">See Subscription</span>
+						</td>
+						<td>
+							@if (log.Success)
+							{
+								<span class="badge bg-success">✓ Success</span>
+							}
+							else
+							{
+								<span class="badge bg-danger">✗ Failed</span>
+							}
+						</td>
+						<td>@log.SentAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
+						<td>
+							@if (!string.IsNullOrEmpty(log.ErrorMessage))
+							{
+								<button class="btn btn-sm btn-outline-danger" @onclick="() => ShowError(log.ErrorMessage)">
+									<span class="oi oi-warning"></span> View
+								</button>
+							}
+							else
+							{
+								<span class="text-muted">-</span>
+							}
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+}
+else
+{
+	<div class="alert alert-info">
+		<strong>No notification logs found.</strong> Logs will appear here once alerts are processed.
+	</div>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+	<div class="alert alert-danger mt-3">
+		<strong>Error:</strong> @errorMessage
+	</div>
+}
+
+@if (showErrorDialog && !string.IsNullOrEmpty(selectedError))
+{
+	<div class="modal" style="display: block; background-color: rgba(0,0,0,0.5);">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header bg-danger text-white">
+					<h5 class="modal-title">Error Details</h5>
+					<button type="button" class="btn-close btn-close-white" @onclick="CloseErrorDialog"></button>
+				</div>
+				<div class="modal-body">
+					<pre class="bg-light p-3">@selectedError</pre>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" @onclick="CloseErrorDialog">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+@code {
+	private List<NotificationLog>? logs;
+	private bool isLoading = true;
+	private string? errorMessage;
+	private bool showErrorDialog = false;
+	private string? selectedError;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadLogs();
+	}
+
+	private async Task LoadLogs()
+	{
+		isLoading = true;
+		errorMessage = null;
+		try
+		{
+			logs = await ApiService.GetNotificationLogsAsync();
+		}
+		catch (Exception ex)
+		{
+			errorMessage = $"Failed to load notification logs: {ex.Message}";
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private void ShowError(string error)
+	{
+		selectedError = error;
+		showErrorDialog = true;
+	}
+
+	private void CloseErrorDialog()
+	{
+		showErrorDialog = false;
+		selectedError = null;
+	}
+}
