@@ -1,0 +1,25 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.dll
+*.exe
+*.pdb
+*.vspscc
+*.vssscc
+.vs/
+
+## Database
+*.db
+*.db-shm
+*.db-wal
+
+## Logs
+*.log
+
+## Config (secrets)
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json
