@@ -80,7 +80,32 @@ You create alert → Alert saved as "Pending"
 
 ## 📧 Configure Real Email (Optional)
 
-Edit `appsettings.json`:
+### Option 1: User Secrets (Recommended for Development) 🔐
+
+Keep your credentials secure and out of Git:
+
+```powershell
+# Initialize user secrets (already done!)
+dotnet user-secrets init
+
+# Set your email credentials
+dotnet user-secrets set "Email:SmtpUser" "your-email@gmail.com"
+dotnet user-secrets set "Email:SmtpPassword" "your-app-password"
+dotnet user-secrets set "Email:FromEmail" "your-email@gmail.com"
+dotnet user-secrets set "Email:FromName" "Alert Notification System"
+
+# View your secrets
+dotnet user-secrets list
+```
+
+**Or run the setup script:**
+```powershell
+.\setup-user-secrets.ps1
+```
+
+### Option 2: Direct Configuration (Not Recommended)
+
+Edit `appsettings.json` (⚠️ Don't commit real passwords to Git!):
 
 ```json
 "Email": {
@@ -190,15 +215,15 @@ chmod +x test-api.sh
 ## 🚀 Next Steps
 
 ### Immediate (Do Now)
-- [ ] Run `dotnet run`
-- [ ] Open Swagger UI
-- [ ] Create a test subscription
-- [ ] Create a test alert
-- [ ] Check the logs
+- [x] Run `dotnet run`
+- [x] Open Swagger UI
+- [x] Create a test subscription
+- [x] Create a test alert
+- [x] Check the logs
 
 ### Soon (This Week)
-- [ ] Configure real email settings
-- [ ] Set up Slack webhook
+- [x] Configure real email settings
+- [x] Set up Slack webhook
 - [ ] Add subscriptions for your team
 - [ ] Customize alert types for your domain
 
