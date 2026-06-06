@@ -1,6 +1,25 @@
 # Alert Notification System
 
+> **📋 Submission Note**: This project was built from an intentionally vague brief as an AI-assisted development exercise.  
+> **Start here for evaluation**: [SUBMISSION_OVERVIEW.md](SUBMISSION_OVERVIEW.md) | [DECISION_LOG.md](DECISION_LOG.md)
+
 A .NET 8 Web API with Blazor Server admin interface for managing and distributing alert notifications across multiple channels (Email, Slack) with extensibility for additional channels.
+
+## 📚 Documentation Index
+
+### For Evaluators
+- **[SUBMISSION_OVERVIEW.md](SUBMISSION_OVERVIEW.md)** - Submission summary and navigation
+- **[DECISION_LOG.md](DECISION_LOG.md)** ⭐ - Complete process documentation and AI analysis
+- **[PROMPT_HISTORY.md](PROMPT_HISTORY.md)** - Conversation history with GitHub Copilot
+- **[SUBMISSION_CHECKLIST.md](SUBMISSION_CHECKLIST.md)** - Pre-submission validation
+
+### Technical Documentation
+- **[PROJECT_DELIVERABLES.md](PROJECT_DELIVERABLES.md)** - Project scope and deliverables
+- **[SYSTEM_DESIGN.md](SYSTEM_DESIGN.md)** - Architecture and design decisions
+- **[GETTING_STARTED.md](GETTING_STARTED.md)** - Detailed setup instructions
+- **[BLAZOR_UI_GUIDE.md](BLAZOR_UI_GUIDE.md)** - Admin interface walkthrough
+- **[RSS_FEED_GUIDE.md](RSS_FEED_GUIDE.md)** - RSS automation feature guide
+- **[USER_SECRETS_SETUP.md](USER_SECRETS_SETUP.md)** - Secure credential configuration
 
 ## Features
 
